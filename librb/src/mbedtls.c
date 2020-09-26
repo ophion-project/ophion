@@ -318,7 +318,7 @@ rb_ssl_connect_common(rb_fde_t *const F, void *const data)
 static const char *
 rb_ssl_strerror(int err)
 {
-	static char errbuf[512];
+	static char errbuf[4096];
 
 	if (err < 0)
 		err = -err;
