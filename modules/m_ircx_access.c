@@ -82,6 +82,7 @@ static int
 ircx_access_init(void)
 {
 	add_isupport("MAXACCESS", isupport_intptr, &ConfigChannel.max_bans);
+	return 0;
 }
 
 static void
@@ -120,7 +121,6 @@ ae_level_name(unsigned int level)
 			return alevel[i].level;
 	}
 
-	s_assert("unknown level");
 	return "???";
 }
 
@@ -135,7 +135,6 @@ ae_level_char(unsigned int level)
 			return alevel[i].mode_char;
 	}
 
-	s_assert("unknown level");
 	return 0;
 }
 

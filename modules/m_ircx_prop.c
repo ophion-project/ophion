@@ -90,6 +90,7 @@ static int
 ircx_prop_init(void)
 {
 	add_isupport("MAXPROP", isupport_intptr, &ConfigChannel.max_prop);
+	return 0;
 }
 
 static void
