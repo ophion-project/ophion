@@ -48,8 +48,8 @@ foreach uh_file : user_help
   install_data('opers' / uh_file, install_dir: user_help_dir, rename: uh_file)
 endforeach
 
-install_subdir('users', install_dir: user_help_dir)
-install_subdir('opers', install_dir: oper_help_dir)
+install_subdir('users', install_dir: help_dir)
+install_subdir('opers', install_dir: help_dir)
 
 # indices
 #user_help_index = custom_target('users-index.stamp',
