@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "Ophion is now compiled using Meson."
+echo
+echo "Please install Meson, and do:"
+echo "   $ meson build --prefix=$HOME/ircd"
+echo "   $ meson install -C build"
