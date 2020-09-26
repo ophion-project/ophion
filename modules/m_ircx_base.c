@@ -73,6 +73,7 @@ ircx_base_init(void)
 	add_isupport("IRCX", isupport_string, "");
 
 	capability_require(serv_capindex, "IRCX");
+	return 0;
 }
 
 static void

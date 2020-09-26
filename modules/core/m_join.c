@@ -536,7 +536,7 @@ ms_sjoin(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source
 	const char *s;
 	char *ptr_uid;
 	char *p;
-	int i, joinc = 0, timeslice = 0;
+	int joinc = 0, timeslice = 0;
 	static char empty[] = "";
 	rb_dlink_node *ptr, *next_ptr;
 	char *mbuf;
