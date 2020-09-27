@@ -179,3 +179,5 @@ subdir('authd')
 subdir('tools')
 subdir('doc')
 subdir('help')
+
+install_data('.ophion-keep', install_dir: log_dir)
