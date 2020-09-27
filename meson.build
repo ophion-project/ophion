@@ -70,9 +70,9 @@ cdata.set_quoted('BRANDING_NAME', meson.project_name())
 cdata.set_quoted('BRANDING_VERSION', meson.project_version())
 
 # nicklen / topiclen / whowas size
-max_nicklen = 32
-max_topiclen = 390
-max_nickname_history_length = 15000
+max_nicklen = get_option('nicklen')
+max_topiclen = get_option('topiclen')
+max_nickname_history_length = get_option('whowas-history-length')
 
 cdata.set('NICKLEN', max_nicklen)
 cdata.set('TOPICLEN', max_topiclen)

@@ -1,0 +1,6 @@
+option('nicklen', type: 'integer', value: 32,
+       description: 'Maximum nickname length (MAXNICKLEN property).')
+option('topiclen', type: 'integer', value: 390,
+       description: 'Maximum topic length (TOPICLEN property).')
+option('whowas-history-length', type: 'integer', value: 15000,
+       description: 'Maximum size of the WHOWAS history array.')
