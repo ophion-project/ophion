@@ -10,6 +10,7 @@ bantool_exe = executable('bantool',
   dependencies: [sqlite_dep],
   link_with: [librb_lib, librsdb_lib],
   install: true,
+  install_rpath: get_option('libdir'),
   include_directories: [librb_inc, base_inc])
 
 bandb_exe = executable('bandb',
@@ -17,4 +18,5 @@ bandb_exe = executable('bandb',
   dependencies: [sqlite_dep],
   link_with: [librb_lib, librsdb_lib],
   install: true,
+  install_rpath: get_option('libdir'),
   include_directories: [librb_inc, base_inc])
