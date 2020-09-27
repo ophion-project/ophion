@@ -156,7 +156,7 @@ cdata.set_quoted('ETC_DIR', etc_dir)
 cdata.set_quoted('PKGRUNDIR', etc_dir)
 cdata.set_quoted('PKGLOCALSTATEDIR', etc_dir)
 
-log_dir = prefix / 'log'
+log_dir = prefix / 'logs'
 cdata.set_quoted('LOG_DIR', log_dir)
 
 help_dir = prefix / 'help'
