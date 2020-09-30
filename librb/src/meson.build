@@ -12,7 +12,7 @@ elif gnutls_dep.found()
 elif libssl_dep.found()
   tls_dep = libssl_dep
 else
-  tls_dep = dependency()
+  tls_dep = declare_dependency()
 endif
 
 librb_lib = shared_library('rb',

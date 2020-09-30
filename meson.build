@@ -34,9 +34,9 @@ if libcrypto_dep.found()
 endif
 
 # grr, mbedtls has no pc file so we have to do this ourselves.  gross.
-mbedtls_lib = cc.find_library('mbedtls', has_headers: ['mbedtls/ssl.h'])
-mbedcrypto_lib = cc.find_library('mbedcrypto')
-mbedx509_lib = cc.find_library('mbedx509')
+mbedtls_lib = cc.find_library('mbedtls', has_headers: ['mbedtls/ssl.h'], required: false)
+mbedcrypto_lib = cc.find_library('mbedcrypto', required: false)
+mbedx509_lib = cc.find_library('mbedx509', required: false)
 
 if mbedtls_lib.found() and mbedcrypto_lib.found() and mbedx509_lib.found()
   mbedtls_dep = declare_dependency(include_directories: '/usr/include',
@@ -50,7 +50,9 @@ endif
 if not mbedtls_dep.found()
   gnutls_dep = dependency('gnutls', required: false)
 
-  cdata.set('HAVE_GNUTLS', true)
+  if gnutls_dep.found()
+    cdata.set('HAVE_GNUTLS', true)
+  endif
 else
   gnutls_dep = disabler()
 endif
