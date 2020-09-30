@@ -42,7 +42,7 @@ struct module
 	char *name;
 	const char *version;
 	const char *description;
-	lt_dlhandle address;
+	void *address;
 	int core;	/* This is int for backwards compat reasons */
 	int origin;	/* Ditto */
 	char *path;
