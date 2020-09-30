@@ -5,6 +5,15 @@ project('ophion', 'c',
 
 cc = meson.get_compiler('c')
 
+# libdl
+libdl_lib = cc.find_library('dl', has_headers: ['dlfcn.h'], required: false)
+if libdl_lib.found()
+  libdl_deps = [libdl_lib]
+else
+  libdl_deps = []
+endif
+libdl_dep = declare_dependency(dependencies: libdl_deps)
+
 # flex / bison
 flex = find_program('flex', required: true)
 bison = find_program('bison', required: true)
