@@ -32,7 +32,7 @@
 
 #define MAPI_CHARYBDIS 2
 
-#include <ltdl.h>
+#include <dlfcn.h>
 
 #include "msg.h"
 #include "hook.h"
