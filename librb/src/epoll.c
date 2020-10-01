@@ -31,19 +31,19 @@
 #include <rb_lib.h>
 #include <commio-int.h>
 #include <event-int.h>
-#if defined(HAVE_EPOLL_CTL) && (HAVE_SYS_EPOLL_H)
+#if defined(HAVE_EPOLL_CTL)
 #define USING_EPOLL
 #include <fcntl.h>
 #include <sys/epoll.h>
 
-#if defined(HAVE_SIGNALFD) && (HAVE_SYS_SIGNALFD_H) && (USE_TIMER_CREATE) && (HAVE_SYS_UIO_H)
+#if defined(HAVE_SIGNALFD)
 #include <signal.h>
 #include <sys/signalfd.h>
 #include <sys/uio.h>
 #define EPOLL_SCHED_EVENT 1
 #endif
 
-#if defined(USE_TIMERFD_CREATE)
+#if defined(HAVE_TIMERFD_CREATE)
 #include <sys/timerfd.h>
 #endif
 
@@ -270,7 +270,7 @@ rb_epoll_supports_event(void)
 		return 0;
 	}
 
-#ifdef USE_TIMERFD_CREATE
+#ifdef HAVE_TIMERFD_CREATE
 	if((fd = timerfd_create(CLOCK_REALTIME, 0)) >= 0)
 	{
 		close(fd);
@@ -431,7 +431,7 @@ rb_epoll_sched_event_signalfd(struct ev_entry *event, int when)
 	return 1;
 }
 
-#ifdef USE_TIMERFD_CREATE
+#ifdef HAVE_TIMERFD_CREATE
 static void
 rb_read_timerfd(rb_fde_t *F, void *data)
 {
@@ -499,7 +499,7 @@ rb_epoll_sched_event_timerfd(struct ev_entry *event, int when)
 int
 rb_epoll_sched_event(struct ev_entry *event, int when)
 {
-#ifdef USE_TIMERFD_CREATE
+#ifdef HAVE_TIMERFD_CREATE
 	if(can_do_timerfd)
 	{
 		return rb_epoll_sched_event_timerfd(event, when);
@@ -511,7 +511,7 @@ rb_epoll_sched_event(struct ev_entry *event, int when)
 void
 rb_epoll_unsched_event(struct ev_entry *event)
 {
-#ifdef USE_TIMERFD_CREATE
+#ifdef HAVE_TIMERFD_CREATE
 	if(can_do_timerfd)
 	{
 		rb_close((rb_fde_t *)event->comm_ptr);
