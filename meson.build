@@ -14,6 +14,15 @@ else
 endif
 libdl_dep = declare_dependency(dependencies: libdl_deps)
 
+# librt
+librt_lib = cc.find_library('rt', has_headers: ['signal.h', 'time.h'], required: false)
+if librt_lib.found()
+  librt_deps = [librt_lib]
+else
+  librt_deps = []
+endif
+librt_dep = declare_dependency(dependencies: librt_deps)
+
 # flex / bison
 flex = find_program('flex', required: true)
 bison = find_program('bison', required: true)

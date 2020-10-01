@@ -6,13 +6,13 @@ librb_version_c = custom_target(
 )
 
 if mbedtls_dep.found()
-  tls_dep = [mbedtls_dep]
+  tls_dep = declare_dependency(dependencies: mbedtls_dep)
 elif gnutls_dep.found()
-  tls_dep = [gnutls_dep]
+  tls_dep = declare_dependency(dependencies: gnutls_dep)
 elif libssl_dep.found()
-  tls_dep = [libcrypto_dep, libssl_dep]
+  tls_dep = declare_dependency(dependencies: [libcrypto_dep, libssl_dep])
 else
-  tls_dep = []
+  tls_dep = declare_dependency()
 endif
 
 librb_lib = shared_library('rb',
@@ -45,7 +45,7 @@ librb_lib = shared_library('rb',
   'arc4random.c',
   librb_version_c,
   librb_serno_h,
-  dependencies: tls_dep,
+  dependencies: [librt_dep, tls_dep],
   install: true,
   include_directories: [librb_inc]
 )
