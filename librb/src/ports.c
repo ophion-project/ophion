@@ -29,7 +29,7 @@
 #include <rb_lib.h>
 #include <commio-int.h>
 #include <event-int.h>
-#if defined(HAVE_PORT_H) && (HAVE_PORT_CREATE)
+#if defined(HAVE_PORT_CREATE)
 
 #include <port.h>
 
