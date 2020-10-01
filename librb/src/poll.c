@@ -27,7 +27,7 @@
 #include <rb_lib.h>
 #include <commio-int.h>
 
-#if defined(HAVE_POLL) && (HAVE_SYS_POLL_H)
+#if defined(HAVE_POLL)
 #include <sys/poll.h>
 
 
