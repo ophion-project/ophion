@@ -35,6 +35,8 @@ modules = [
   'm_ircx_base',
   'm_ircx_prop',
   'm_ircx_prop_adminkey',
+  'm_ircx_prop_entity_channel',
+  'm_ircx_prop_entity_user',
   'm_ircx_prop_member_of',
   'm_ircx_prop_onjoin',
   'm_ircx_prop_opkey',
