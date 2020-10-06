@@ -28,7 +28,7 @@
 #include <commio-int.h>
 
 #if defined(HAVE_POLL)
-#include <sys/poll.h>
+#include <poll.h>
 
 
 /* I hate linux -- adrian */
