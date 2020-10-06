@@ -51,11 +51,14 @@ enum PropMatchRequest {
 
 struct PropMatch {
 	const char *target_name;
+	const char *key;
 	void *target;
 	rb_dlink_list *prop_list;
 	enum PropMatchRequest match_request;
 	enum PropMatchRequest match_grant;
 	bool redistribute;
+	struct Client *source_p;
+	int alevel;
 };
 
 struct Property *propertyset_add(rb_dlink_list *prop_list, const char *name, const char *value, struct Client *setter_p);

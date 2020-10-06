@@ -66,23 +66,27 @@ static int h_prop_show;
 static int h_prop_chan_write;
 static int h_prop_user_write;
 static int h_prop_change;
+static int h_prop_match;
 
 mapi_hlist_av1 ircx_prop_hlist[] = {
 	{ "prop_show", &h_prop_show },
 	{ "prop_chan_write", &h_prop_chan_write },
 	{ "prop_user_write", &h_prop_user_write },
 	{ "prop_change", &h_prop_change },
+	{ "prop_match", &h_prop_match },
 	{ NULL, NULL }
 };
 
 static void h_prop_burst_channel(void *);
 static void h_prop_burst_client(void *);
 static void h_prop_channel_lowerts(void *);
+static void h_prop_match_fn(void *);
 
 mapi_hfn_list_av1 ircx_prop_hfnlist[] = {
 	{ "burst_channel", (hookfn) h_prop_burst_channel },
 	{ "burst_client", (hookfn) h_prop_burst_client },
 	{ "channel_lowerts", (hookfn) h_prop_channel_lowerts },
+	{ "prop_match", (hookfn) h_prop_match_fn },
 	{ NULL, NULL }
 };
 
@@ -102,13 +106,11 @@ ircx_prop_deinit(void)
 DECLARE_MODULE_AV2(ircx_prop, ircx_prop_init, ircx_prop_deinit, ircx_prop_clist, ircx_prop_hlist, ircx_prop_hfnlist, NULL, NULL, ircx_prop_desc);
 
 static void
-handle_prop_list(const char *target, const void *target_ptr, const rb_dlink_list *prop_list, struct Client *source_p, const char *keys, int alevel)
+handle_prop_list(const struct PropMatch *prop_match, struct Client *source_p, const char *keys, int alevel)
 {
 	rb_dlink_node *iter;
 
-	s_assert(prop_list != NULL);
-
-	RB_DLINK_FOREACH(iter, prop_list->head)
+	RB_DLINK_FOREACH(iter, prop_match->prop_list->head)
 	{
 		struct Property *prop = iter->data;
 		hook_data_prop_activity prop_activity;
@@ -117,12 +119,12 @@ handle_prop_list(const char *target, const void *target_ptr, const rb_dlink_list
 			continue;
 
 		prop_activity.client = source_p;
-		prop_activity.target = target;
-		prop_activity.prop_list = prop_list;
+		prop_activity.target = prop_match->target_name;
+		prop_activity.prop_list = prop_match->prop_list;
 		prop_activity.key = prop->name;
 		prop_activity.alevel = alevel;
 		prop_activity.approved = 1;
-		prop_activity.target_ptr = target_ptr;
+		prop_activity.target_ptr = prop_match->target;
 
 		call_hook(h_prop_show, &prop_activity);
 
@@ -130,49 +132,54 @@ handle_prop_list(const char *target, const void *target_ptr, const rb_dlink_list
 			continue;
 
 		sendto_one_numeric(source_p, RPL_PROPLIST, form_str(RPL_PROPLIST),
-			target, prop->name, prop->value);
+			prop_match->target_name, prop->name, prop->value);
 	}
 
-	sendto_one_numeric(source_p, RPL_PROPEND, form_str(RPL_PROPEND), target);
+	sendto_one_numeric(source_p, RPL_PROPEND, form_str(RPL_PROPEND), prop_match->target_name);
 }
 
 static void
-handle_prop_upsert_or_delete(const char *target, const void *target_ptr, rb_dlink_list *prop_list, struct Client *source_p, const char *prop, const char *value)
+handle_prop_upsert_or_delete(const struct PropMatch *prop_match, struct Client *source_p, const char *prop, const char *value)
 {
 	struct Property *property;
 	hook_data_prop_activity prop_activity;
 
-	propertyset_delete(prop_list, prop);
+	propertyset_delete(prop_match->prop_list, prop);
 
 	/* deletion: value is empty string */
 	if (! *value)
 	{
 		sendto_one(source_p, ":%s!%s@%s PROP %s %s :", source_p->name, source_p->username, source_p->host,
-			target, prop);
+			prop_match->target_name, prop);
 		goto broadcast;
 	}
 
 	/* enforce MAXPROP on upsert */
-	if (rb_dlink_list_length(prop_list) >= ConfigChannel.max_prop)
+	if (rb_dlink_list_length(prop_match->prop_list) >= ConfigChannel.max_prop)
 	{
-		sendto_one_numeric(source_p, ERR_PROP_TOOMANY, form_str(ERR_PROP_TOOMANY), target);
+		sendto_one_numeric(source_p, ERR_PROP_TOOMANY, form_str(ERR_PROP_TOOMANY), prop_match->target_name);
 		return;
 	}
 
-	property = propertyset_add(prop_list, prop, value, source_p);
+	property = propertyset_add(prop_match->prop_list, prop, value, source_p);
 
 	sendto_one(source_p, ":%s!%s@%s PROP %s %s :%s", source_p->name, source_p->username, source_p->host,
-		target, property->name, property->value);
+		prop_match->target_name, property->name, property->value);
 
 	// XXX: enforce CAP_IRCX
 	// XXX: rewrite target to UID if needed
 
 	// don't redistribute updates for local channels
-	if (IsChanPrefix(*target) && *target == '&')
+	if (!prop_match->redistribute)
+		goto broadcast;
+
+	if (IsChanPrefix(*prop_match->target_name) && *prop_match->target_name == '&')
 		goto broadcast;
 
 	sendto_server(source_p, NULL, CAP_TS6, NOCAPS,
-			":%s PROP %s %s :%s", use_id(source_p), target, property->name, property->value);
+			":%s PROP %s %s :%s",
+			use_id(source_p), prop_match->target_name,
+			property->name, property->value);
 
 	prop = property->name;
 	value = property->value;
@@ -180,13 +187,13 @@ handle_prop_upsert_or_delete(const char *target, const void *target_ptr, rb_dlin
 	// broadcast the property change to local members
 broadcast:
 	prop_activity.client = source_p;
-	prop_activity.target = target;
-	prop_activity.prop_list = prop_list;
+	prop_activity.target = prop_match->target_name;
+	prop_activity.prop_list = prop_match->prop_list;
 	prop_activity.key = prop;
 	prop_activity.value = value;
 	prop_activity.alevel = CHFL_ADMIN;
 	prop_activity.approved = 1;
-	prop_activity.target_ptr = target_ptr;
+	prop_activity.target_ptr = prop_match->target;
 
 	call_hook(h_prop_change, &prop_activity);
 }
@@ -235,77 +242,38 @@ can_write_to_user_property(struct Client *source_p, struct Client *target_p, con
  * LIST: PROP target [filters] (parc <= 3)
  * SET: PROP target key :value (parc == 4)
  * DELETE: PROP target key : (parc == 4)
- *
- * XXX: Like original IRCX, only channels supported at the moment.
  */
 static void
 m_prop(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	void *target_ptr;
-	rb_dlink_list *prop_list;
-	bool write_allowed = false;
-	int alevel = CHFL_PEON;
+	struct PropMatch prop_match = {
+		.target_name = parv[1],
+		.match_request = parc <= 3 ? PROP_READ : PROP_WRITE,
+		.source_p = source_p,
+		.key = parv[2],
+		.alevel = CHFL_PEON,
+	};
 
-	if (IsChanPrefix(*parv[1]))
-	{
-		struct Channel *chan = find_channel(parv[1]);
-		struct membership *msptr = find_channel_membership(chan, source_p);
-
-		if (chan == NULL)
-		{
-			sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), parv[1]);
-			return;
-		}
-
-		target_ptr = chan;
-		prop_list = &chan->prop_list;
-
-		if (msptr != NULL)
-			alevel = get_channel_access(source_p, chan, msptr, MODE_ADD, NULL);
-
-		if (parc == 4)
-		{
-			if (!MyClient(source_p))
-				write_allowed = true;
-			else
-				write_allowed = can_write_to_channel_property(source_p, chan, parv[2], alevel);
-		}
-	}
-	else
-	{
-		struct Client *target_p = find_client(parv[1]);
-
-		if (target_p == NULL || target_p->user == NULL)
-		{
-			sendto_one_numeric(source_p, ERR_NOSUCHNICK, form_str(ERR_NOSUCHNICK), parv[1]);
-			return;
-		}
-
-		target_ptr = target_p;
-		prop_list = &target_p->user->prop_list;
-
-		if (parc == 4)
-			write_allowed = can_write_to_user_property(source_p, target_p, parv[2]);
-	}
+	call_hook(h_prop_match, &prop_match);
 
 	switch (parc)
 	{
 	case 2:
-		handle_prop_list(parv[1], target_ptr, prop_list, source_p, NULL, alevel);
+		handle_prop_list(&prop_match, source_p, NULL, prop_match.alevel);
 		break;
 
 	case 3:
-		handle_prop_list(parv[1], target_ptr, prop_list, source_p, parv[2], alevel);
+		handle_prop_list(&prop_match, source_p, parv[2], prop_match.alevel);
 		break;
 
 	case 4:
-		if (!write_allowed && MyClient(source_p))
+		if (prop_match.match_grant != PROP_WRITE && MyClient(source_p))
 		{
 			sendto_one_numeric(source_p, ERR_PROPDENIED, form_str(ERR_PROPDENIED), parv[1]);
 			return;
 		}
 
-		handle_prop_upsert_or_delete(parv[1], target_ptr, prop_list, source_p, parv[2], parv[3]);
+		handle_prop_upsert_or_delete(&prop_match, source_p, parv[2], parv[3]);
 		break;
 
 	default:
@@ -360,6 +328,54 @@ h_prop_channel_lowerts(void *vdata)
 	struct Channel *chptr = hchaninfo->chptr;
 
 	propertyset_clear(&chptr->prop_list);
+}
+
+static void
+h_prop_match_fn(void *vdata)
+{
+	struct PropMatch *prop_match = vdata;
+
+	if (IsChanPrefix(*prop_match->target_name))
+	{
+		struct Channel *chan = find_channel(prop_match->target_name);
+		struct membership *msptr = find_channel_membership(chan, prop_match->source_p);
+
+		if (chan == NULL)
+		{
+			sendto_one_numeric(prop_match->source_p, ERR_NOSUCHCHANNEL, form_str(ERR_NOSUCHCHANNEL), prop_match->target_name);
+			return;
+		}
+
+		if (msptr != NULL)
+			prop_match->alevel = get_channel_access(prop_match->source_p, chan, msptr, MODE_ADD, NULL);
+
+		if (prop_match->match_request == PROP_WRITE)
+		{
+			if (!MyClient(prop_match->source_p))
+				prop_match->match_grant = PROP_WRITE;
+			else
+				prop_match->match_grant =
+					can_write_to_channel_property(prop_match->source_p, chan, prop_match->key, prop_match->alevel) ? PROP_WRITE : PROP_READ;
+		}
+		else
+			prop_match->match_grant = prop_match->match_request;
+	}
+	else
+	{
+		struct Client *target_p = find_client(prop_match->target_name);
+
+		if (target_p == NULL || target_p->user == NULL)
+		{
+			sendto_one_numeric(prop_match->source_p, ERR_NOSUCHNICK, form_str(ERR_NOSUCHNICK), prop_match->target_name);
+			return;
+		}
+
+		if (prop_match->match_request == PROP_WRITE)
+			prop_match->match_grant =
+				can_write_to_user_property(prop_match->source_p, target_p, prop_match->key) ? PROP_WRITE : PROP_READ;
+		else
+			prop_match->match_grant = prop_match->match_request;
+	}
 }
 
 /*
