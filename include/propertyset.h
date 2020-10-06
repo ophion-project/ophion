@@ -43,10 +43,17 @@ struct Property {
 	rb_dlink_node prop_node;
 };
 
+enum PropMatchRequest {
+	PROP_EXISTS,
+	PROP_READ,
+	PROP_WRITE,
+};
+
 struct PropMatch {
 	const char *entity_name;
 	void *entity;
 	rb_dlink_list *prop_list;
+	enum PropMatchRequest match_request;
 };
 
 struct Property *propertyset_add(rb_dlink_list *prop_list, const char *name, const char *value, struct Client *setter_p);
