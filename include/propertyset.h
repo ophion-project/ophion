@@ -43,6 +43,12 @@ struct Property {
 	rb_dlink_node prop_node;
 };
 
+struct PropMatch {
+	const char *entity_name;
+	void *entity;
+	rb_dlink_list *prop_list;
+};
+
 struct Property *propertyset_add(rb_dlink_list *prop_list, const char *name, const char *value, struct Client *setter_p);
 void propertyset_delete(rb_dlink_list *prop_list, const char *name);
 struct Property *propertyset_find(const rb_dlink_list *prop_list, const char *name);
