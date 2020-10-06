@@ -50,8 +50,8 @@ enum PropMatchRequest {
 };
 
 struct PropMatch {
-	const char *entity_name;
-	void *entity;
+	const char *target_name;
+	void *target;
 	rb_dlink_list *prop_list;
 	enum PropMatchRequest match_request;
 };
