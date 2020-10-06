@@ -54,6 +54,7 @@ struct PropMatch {
 	void *target;
 	rb_dlink_list *prop_list;
 	enum PropMatchRequest match_request;
+	enum PropMatchRequest match_grant;
 	bool redistribute;
 };
 
