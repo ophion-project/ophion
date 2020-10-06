@@ -54,6 +54,7 @@ struct PropMatch {
 	void *target;
 	rb_dlink_list *prop_list;
 	enum PropMatchRequest match_request;
+	bool redistribute;
 };
 
 struct Property *propertyset_add(rb_dlink_list *prop_list, const char *name, const char *value, struct Client *setter_p);
