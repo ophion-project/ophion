@@ -121,6 +121,9 @@ h_prop_match(void *vdata)
 			can_write_to_user_property(prop_match->source_p, target_p, prop_match->key) ? PROP_WRITE : PROP_READ;
 	else
 		prop_match->match_grant = prop_match->match_request;
+
+	prop_match->redistribute = true;
+	prop_match->creation_ts = target_p->tsinfo;
 }
 
 DECLARE_MODULE_AV2(ircx_prop_entity_user, NULL, NULL, NULL, ircx_prop_entity_user_hlist, ircx_prop_entity_user_hfnlist, NULL, NULL, ircx_prop_entity_user_desc);

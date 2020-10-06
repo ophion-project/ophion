@@ -122,6 +122,7 @@ h_prop_match(void *vdata)
 		prop_match->match_grant = prop_match->match_request;
 
 	prop_match->redistribute = *prop_match->target_name != '&';
+	prop_match->creation_ts = chan->channelts;
 }
 
 static void
