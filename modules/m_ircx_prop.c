@@ -236,61 +236,43 @@ m_prop(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p
 static void
 ms_tprop(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	rb_dlink_list *prop_list = NULL;
+	struct PropMatch prop_match = {
+		.target_name = parv[1],
+		.match_request = PROP_WRITE,
+		.source_p = source_p,
+		.key = parv[4],
+		.alevel = CHFL_PEON,
+	};
+
 	time_t creation_ts = atol(parv[2]);
 	time_t update_ts = atol(parv[3]);
-	struct Channel *chptr = NULL;
-	void *target_ptr = NULL;
 	hook_data_prop_activity prop_activity;
 
-	if (IsChanPrefix(*parv[1]))
-	{
-		chptr = find_channel(parv[1]);
-		if (chptr == NULL)
-			return;
+	call_hook(h_prop_match, &prop_match);
 
-		/* if creation_ts is newer than channelts, reject the TPROP */
-		if (creation_ts > chptr->channelts)
-			return;
+	if (prop_match.prop_list == NULL)
+		return;
 
-		prop_list = &chptr->prop_list;
-		target_ptr = chptr;
-	}
-	else
-	{
-		struct Client *target_p = find_client(parv[1]);
-		if (target_p == NULL || target_p->user == NULL)
-			return;
-
-		/* if creation_ts does not match nick TS, reject the TPROP */
-		if (creation_ts != target_p->tsinfo)
-			return;
-
-		prop_list = &target_p->user->prop_list;
-		target_ptr = target_p;
-	}
-
-	/* couldn't figure out what to mutate, bail */
-	if (prop_list == NULL)
+	if (creation_ts > prop_match.creation_ts)
 		return;
 
 	/* do the upsert */
-	struct Property *prop = propertyset_add(prop_list, parv[4], parv[5], source_p);
+	struct Property *prop = propertyset_add(prop_match.prop_list, parv[4], parv[5], source_p);
 	prop->set_at = update_ts;
 
-	sendto_server(source_p, chptr, CAP_TS6, NOCAPS,
+	sendto_server(source_p, NULL, CAP_TS6, NOCAPS,
 		":%s TPROP %s %ld %ld %s :%s",
 		use_id(&me), parv[1], creation_ts, prop->set_at, prop->name, prop->value);
 
 	// broadcast the property change to local members
 	prop_activity.client = &me;
-	prop_activity.target = parv[1];
-	prop_activity.prop_list = prop_list;
+	prop_activity.target = prop_match.target_name;
+	prop_activity.prop_list = prop_match.prop_list;
 	prop_activity.key = prop->name;
 	prop_activity.value = prop->value;
 	prop_activity.alevel = CHFL_ADMIN;
 	prop_activity.approved = 1;
-	prop_activity.target_ptr = target_ptr;
+	prop_activity.target_ptr = prop_match.target;
 
 	call_hook(h_prop_change, &prop_activity);
 }
