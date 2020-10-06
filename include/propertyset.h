@@ -59,6 +59,8 @@ struct PropMatch {
 	bool redistribute;
 	struct Client *source_p;
 	int alevel;
+	time_t creation_ts;
+	time_t update_ts;
 };
 
 struct Property *propertyset_add(rb_dlink_list *prop_list, const char *name, const char *value, struct Client *setter_p);
