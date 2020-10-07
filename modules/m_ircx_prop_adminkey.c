@@ -109,8 +109,6 @@ h_prop_authorize(void *vdata)
 	if (!IsChanPrefix(*data->target))
 		return;
 
-	if (rb_strcasecmp(data->key, "ADMINKEY") || rb_strcasecmp(data->key, "OWNERKEY"))
-		return;
-
-	data->approved = data->alevel >= CHFL_ADMIN;
+	if (!rb_strcasecmp(data->key, "ADMINKEY") || !rb_strcasecmp(data->key, "OWNERKEY"))
+		data->approved = data->alevel >= CHFL_ADMIN;
 }
