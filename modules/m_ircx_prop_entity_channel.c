@@ -123,6 +123,8 @@ h_prop_match(void *vdata)
 
 	prop_match->redistribute = *prop_match->target_name != '&';
 	prop_match->creation_ts = chan->channelts;
+	prop_match->prop_list = &chan->prop_list;
+	prop_match->target = chan;
 }
 
 static void

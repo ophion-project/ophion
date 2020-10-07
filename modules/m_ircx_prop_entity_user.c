@@ -124,6 +124,8 @@ h_prop_match(void *vdata)
 
 	prop_match->redistribute = true;
 	prop_match->creation_ts = target_p->tsinfo;
+	prop_match->prop_list = &target_p->user->prop_list;
+	prop_match->target = target_p;
 }
 
 DECLARE_MODULE_AV2(ircx_prop_entity_user, NULL, NULL, NULL, ircx_prop_entity_user_hlist, ircx_prop_entity_user_hfnlist, NULL, NULL, ircx_prop_entity_user_desc);
