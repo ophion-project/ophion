@@ -199,6 +199,9 @@ m_prop(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p
 
 	call_hook(h_prop_match, &prop_match);
 
+	if (prop_match.prop_list == NULL)
+		return;
+
 	switch (parc)
 	{
 	case 2:
