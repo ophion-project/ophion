@@ -110,6 +110,9 @@ h_prop_match(void *vdata)
 	struct PropMatch *prop_match = vdata;
 	struct Client *target_p = find_client(prop_match->target_name);
 
+	if (prop_match->target)
+		return;
+
 	if (target_p == NULL || target_p->user == NULL)
 	{
 		sendto_one_numeric(prop_match->source_p, ERR_NOSUCHNICK, form_str(ERR_NOSUCHNICK), prop_match->target_name);
