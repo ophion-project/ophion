@@ -57,7 +57,7 @@ static void h_prop_match(void *);
 
 mapi_hfn_list_av1 ircx_prop_entity_user_hfnlist[] = {
 	{ "burst_client", (hookfn) h_prop_burst_client },
-	{ "prop_match", (hookfn) h_prop_match },
+	{ "prop_match", (hookfn) h_prop_match, HOOK_HIGHEST },
 	{ NULL, NULL }
 };
 
