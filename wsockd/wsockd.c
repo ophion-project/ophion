@@ -95,7 +95,9 @@ typedef struct _conn
 	char client_key[37];		/* maximum 36 bytes + nul */
 } conn_t;
 
-#define WEBSOCKET_OPCODE_TEXT_FRAME          1
+#define WEBSOCKET_OPCODE_TEXT_FRAME		0x1
+#define WEBSOCKET_OPCODE_PING_FRAME		0x9
+#define WEBSOCKET_OPCODE_PONG_FRAME		0xA
 
 #define WEBSOCKET_MASK_LENGTH 4
 
@@ -577,31 +579,77 @@ conn_mod_process_huge(conn_t *conn, ws_frame_hdr_t *hdr, int masked)
 }
 
 static void
+conn_mod_process_ping(conn_t *conn, ws_frame_hdr_t *hdr, int masked)
+{
+	char msg[WEBSOCKET_MAX_UNEXTENDED_PAYLOAD_DATA_LENGTH];
+	int dolen = rb_rawbuf_get(conn->modbuf_in, msg, hdr->payload_length_mask);
+	if (!dolen)
+	{
+		close_conn(conn, WAIT_PLAIN, "websocket error: fault unpacking message");
+		return;
+	}
+
+	ws_frame_hdr_t out_hdr = WEBSOCKET_FRAME_HDR_INIT;
+
+	ws_frame_set_opcode(&out_hdr, WEBSOCKET_OPCODE_PONG_FRAME);
+	ws_frame_set_fin(&out_hdr, 1);
+	out_hdr.payload_length_mask = (dolen) & 0x7f;
+
+	conn_mod_write(conn, &out_hdr, sizeof(out_hdr));
+	conn_mod_write(conn, msg, dolen);
+}
+
+static void
+conn_mod_process_pong(conn_t *conn, ws_frame_hdr_t *hdr, int masked)
+{
+	char msg[WEBSOCKET_MAX_UNEXTENDED_PAYLOAD_DATA_LENGTH];
+	int dolen = rb_rawbuf_get(conn->modbuf_in, msg, hdr->payload_length_mask);
+	if (!dolen)
+	{
+		close_conn(conn, WAIT_PLAIN, "websocket error: fault unpacking message");
+		return;
+	}
+}
+
+static void
 conn_mod_process(conn_t *conn)
 {
 	ws_frame_hdr_t hdr;
 
 	while (1)
 	{
-		int masked;
+		int masked, opcode;
+
 		int dolen = rb_rawbuf_get(conn->modbuf_in, &hdr, sizeof(hdr));
 		if (dolen != sizeof(hdr))
 			break;
 
 		masked = (hdr.payload_length_mask >> 7) == 1;
-
 		hdr.payload_length_mask &= 0x7f;
-		switch (hdr.payload_length_mask)
+
+		opcode = (hdr.opcode_rsv_fin & 0xF);
+
+		switch (opcode)
 		{
-		case 126:
-			conn_mod_process_large(conn, &hdr, masked);
+		case WEBSOCKET_OPCODE_PING_FRAME:
+			conn_mod_process_ping(conn, &hdr, masked);
 			break;
-		case 127:
-			conn_mod_process_huge(conn, &hdr, masked);
+		case WEBSOCKET_OPCODE_PONG_FRAME:
+			conn_mod_process_pong(conn, &hdr, masked);
 			break;
 		default:
-			conn_mod_process_frame(conn, &hdr, masked);
-			break;
+			switch (hdr.payload_length_mask)
+			{
+			case 126:
+				conn_mod_process_large(conn, &hdr, masked);
+				break;
+			case 127:
+				conn_mod_process_huge(conn, &hdr, masked);
+				break;
+			default:
+				conn_mod_process_frame(conn, &hdr, masked);
+				break;
+			}
 		}
 	}
 
