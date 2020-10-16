@@ -582,12 +582,28 @@ static void
 conn_mod_process_ping(conn_t *conn, ws_frame_hdr_t *hdr, int masked)
 {
 	char msg[WEBSOCKET_MAX_UNEXTENDED_PAYLOAD_DATA_LENGTH];
-	int dolen = rb_rawbuf_get(conn->modbuf_in, msg, hdr->payload_length_mask);
+	uint8_t maskval[WEBSOCKET_MASK_LENGTH];
+	int dolen;
+
+	if (masked)
+	{
+		dolen = rb_rawbuf_get(conn->modbuf_in, maskval, sizeof(maskval));
+		if (!dolen)
+		{
+			close_conn(conn, WAIT_PLAIN, "websocket error: fault unpacking unmask key");
+			return;
+		}
+	}
+
+	dolen = rb_rawbuf_get(conn->modbuf_in, msg, hdr->payload_length_mask);
 	if (!dolen)
 	{
 		close_conn(conn, WAIT_PLAIN, "websocket error: fault unpacking message");
 		return;
 	}
+
+	if (masked)
+		ws_frame_unmask(msg, dolen, maskval);
 
 	ws_frame_hdr_t out_hdr = WEBSOCKET_FRAME_HDR_INIT;
 
