@@ -96,6 +96,7 @@ typedef struct _conn
 } conn_t;
 
 #define WEBSOCKET_OPCODE_TEXT_FRAME		0x1
+#define WEBSOCKET_OPCODE_CLOSE_FRAME		0x8
 #define WEBSOCKET_OPCODE_PING_FRAME		0x9
 #define WEBSOCKET_OPCODE_PONG_FRAME		0xA
 
@@ -647,6 +648,9 @@ conn_mod_process(conn_t *conn)
 
 		switch (opcode)
 		{
+		case WEBSOCKET_OPCODE_CLOSE_FRAME:
+			close_conn(conn, WAIT_PLAIN, "websocket error: received close frame");
+			break;
 		case WEBSOCKET_OPCODE_PING_FRAME:
 			conn_mod_process_ping(conn, &hdr, masked);
 			break;
