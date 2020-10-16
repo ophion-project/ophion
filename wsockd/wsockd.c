@@ -524,6 +524,7 @@ conn_mod_process_frame(conn_t *conn, ws_frame_hdr_t *hdr, int masked)
 		ws_frame_unmask(msg, dolen, maskval);
 
 	rb_linebuf_parse(&conn->plainbuf_out, msg, dolen, 1);
+	rb_linebuf_parse(&conn->plainbuf_out, "\r\n", 2, 1);
 }
 
 static void
@@ -566,6 +567,7 @@ conn_mod_process_large(conn_t *conn, ws_frame_hdr_t *hdr, int masked)
 		ws_frame_unmask(msg, dolen, maskval);
 
 	rb_linebuf_parse(&conn->plainbuf_out, msg, dolen, 1);
+	rb_linebuf_parse(&conn->plainbuf_out, "\r\n", 2, 1);
 }
 
 static void
