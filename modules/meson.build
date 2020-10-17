@@ -14,6 +14,7 @@ modules = [
   'extb_ssl',
   'um_callerid',
   'um_regonlymsg',
+  'm_acc',
   'm_accept',
   'm_admin',
   'm_alias',
