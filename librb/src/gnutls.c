@@ -66,7 +66,7 @@ static unsigned int client_cert_count;
 
 // Shared variables
 static gnutls_priority_t default_priority;
-
+static bool gnutls_verify;
 
 
 struct ssl_connect
@@ -171,7 +171,7 @@ rb_ssl_init_fd(rb_fde_t *const F, const rb_fd_tls_direction dir)
 	if (gnutls_priority_set(SSL_P(F), default_priority) != GNUTLS_E_SUCCESS)
 		gnutls_set_default_priority(SSL_P(F));
 
-	if(dir == RB_FD_TLS_DIRECTION_IN)
+	if(gnutls_verify && dir == RB_FD_TLS_DIRECTION_IN)
 		gnutls_certificate_server_set_request(SSL_P(F), GNUTLS_CERT_REQUEST);
 }
 
@@ -487,8 +487,10 @@ rb_init_ssl(void)
 
 int
 rb_setup_ssl_server(const char *const certfile, const char *keyfile,
-                    const char *const dhfile, const char *cipherlist)
+                    const char *const dhfile, const char *cipherlist, bool verify)
 {
+	gnutls_verify = verify;
+
 	if(certfile == NULL)
 	{
 		rb_lib_log("%s: no certificate file specified", __func__);
@@ -500,7 +502,6 @@ rb_setup_ssl_server(const char *const certfile, const char *keyfile,
 
 	if(cipherlist == NULL)
 		cipherlist = rb_gnutls_default_priority_str;
-
 
 	gnutls_datum_t *const d_cert = rb_load_file_into_datum_t(certfile);
 	if(d_cert == NULL)

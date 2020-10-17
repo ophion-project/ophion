@@ -726,7 +726,7 @@ ssl_cmd_write_queue(ssl_ctl_t * ctl, rb_fde_t ** F, int count, const void *buf, 
 static void
 send_new_ssl_certs_one(ssl_ctl_t * ctl)
 {
-	size_t len = 5;
+	size_t len = 6;
 
 	if(ServerInfo.ssl_cert)
 		len += strlen(ServerInfo.ssl_cert);
@@ -753,11 +753,12 @@ send_new_ssl_certs_one(ssl_ctl_t * ctl)
 		return;
 	}
 
-	int ret = snprintf(tmpbuf, sizeof(tmpbuf), "K%c%s%c%s%c%s%c%s%c", nul,
+	int ret = snprintf(tmpbuf, sizeof(tmpbuf), "K%c%s%c%s%c%s%c%s%c%d", nul,
 	                   ServerInfo.ssl_cert, nul,
 	                   ServerInfo.ssl_private_key != NULL ? ServerInfo.ssl_private_key : "", nul,
 	                   ServerInfo.ssl_dh_params != NULL ? ServerInfo.ssl_dh_params : "", nul,
-	                   ServerInfo.ssl_cipher_list != NULL ? ServerInfo.ssl_cipher_list : "", nul);
+	                   ServerInfo.ssl_cipher_list != NULL ? ServerInfo.ssl_cipher_list : "", nul,
+			   ServerInfo.ssl_client_cert);
 
 	if(ret > 5)
 		ssl_cmd_write_queue(ctl, NULL, 0, tmpbuf, (size_t) ret);

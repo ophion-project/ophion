@@ -187,7 +187,7 @@ rb_ssl_init_fd(rb_fde_t *const F, const rb_fd_tls_direction dir)
 }
 
 static rb_mbedtls_cfg_context *
-rb_mbedtls_cfg_new(void)
+rb_mbedtls_cfg_new(bool verify)
 {
 	rb_mbedtls_cfg_context *const cfg = rb_malloc(sizeof *cfg);
 
@@ -230,7 +230,7 @@ rb_mbedtls_cfg_new(void)
 	mbedtls_ssl_conf_ca_chain(&cfg->server_cfg, &dummy_ca_ctx, NULL);
 	mbedtls_ssl_conf_ca_chain(&cfg->client_cfg, &dummy_ca_ctx, NULL);
 
-	mbedtls_ssl_conf_authmode(&cfg->server_cfg, MBEDTLS_SSL_VERIFY_OPTIONAL);
+	mbedtls_ssl_conf_authmode(&cfg->server_cfg, verify ? MBEDTLS_SSL_VERIFY_OPTIONAL : MBEDTLS_SSL_VERIFY_NONE);
 	mbedtls_ssl_conf_authmode(&cfg->client_cfg, MBEDTLS_SSL_VERIFY_NONE);
 
 	mbedtls_ssl_conf_min_version(&cfg->server_cfg, MBEDTLS_SSL_MAJOR_VERSION_3, MBEDTLS_SSL_MINOR_VERSION_2);
@@ -451,7 +451,7 @@ rb_init_ssl(void)
 
 int
 rb_setup_ssl_server(const char *const certfile, const char *keyfile,
-                    const char *const dhfile, const char *const cipherlist)
+                    const char *const dhfile, const char *const cipherlist, bool verify)
 {
 	if(certfile == NULL)
 	{
@@ -462,7 +462,7 @@ rb_setup_ssl_server(const char *const certfile, const char *keyfile,
 	if(keyfile == NULL)
 		keyfile = certfile;
 
-	rb_mbedtls_cfg_context *const newcfg = rb_mbedtls_cfg_new();
+	rb_mbedtls_cfg_context *const newcfg = rb_mbedtls_cfg_new(verify);
 
 	if(newcfg == NULL)
 	{

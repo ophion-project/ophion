@@ -33,7 +33,7 @@
 #include <commio-ssl.h>
 
 int
-rb_setup_ssl_server(const char *cert __attribute__((unused)), const char *keyfile __attribute__((unused)), const char *dhfile __attribute__((unused)), const char *cipher_list __attribute__((unused)))
+rb_setup_ssl_server(const char *cert __attribute__((unused)), const char *keyfile __attribute__((unused)), const char *dhfile __attribute__((unused)), const char *cipher_list __attribute__((unused)), bool verify __attribute__((unused)))
 {
 	errno = ENOSYS;
 	return 0;

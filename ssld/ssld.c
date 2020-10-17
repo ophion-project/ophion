@@ -896,6 +896,7 @@ ssl_new_keys(mod_ctl_t * ctl, mod_ctl_buf_t * ctl_buf)
 {
 	char *buf;
 	char *cert, *key, *dhparam, *cipher_list;
+	bool verify = false;
 
 	buf = (char *) &ctl_buf->buf[2];
 	cert = buf;
@@ -911,8 +912,11 @@ ssl_new_keys(mod_ctl_t * ctl, mod_ctl_buf_t * ctl_buf)
 		dhparam = NULL;
 	if(strlen(cipher_list) == 0)
 		cipher_list = NULL;
+	buf += strlen(cipher_list) + 1;
+	if (*buf == '1')
+		verify = true;
 
-	if(!rb_setup_ssl_server(cert, key, dhparam, cipher_list))
+	if(!rb_setup_ssl_server(cert, key, dhparam, cipher_list, verify))
 	{
 		const char *invalid = "I";
 		mod_cmd_write_queue(ctl, invalid, strlen(invalid));

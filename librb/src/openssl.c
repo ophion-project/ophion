@@ -339,7 +339,8 @@ rb_init_ssl(void)
 
 int
 rb_setup_ssl_server(const char *const certfile, const char *keyfile,
-                    const char *const dhfile, const char *cipherlist)
+                    const char *const dhfile, const char *cipherlist,
+		    bool verify)
 {
 	if(certfile == NULL)
 	{
@@ -421,7 +422,9 @@ rb_setup_ssl_server(const char *const certfile, const char *keyfile,
 	}
 
 	SSL_CTX_set_session_cache_mode(ssl_ctx_new, SSL_SESS_CACHE_OFF);
-	SSL_CTX_set_verify(ssl_ctx_new, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, verify_accept_all_cb);
+
+	if (verify)
+		SSL_CTX_set_verify(ssl_ctx_new, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, verify_accept_all_cb);
 
 	#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
 	(void) SSL_CTX_clear_options(ssl_ctx_new, SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS);
