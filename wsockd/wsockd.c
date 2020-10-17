@@ -102,7 +102,7 @@ typedef struct _conn
 
 #define WEBSOCKET_MASK_LENGTH 4
 
-#define WEBSOCKET_MAX_UNEXTENDED_PAYLOAD_DATA_LENGTH 125
+#define WEBSOCKET_MAX_UNEXTENDED_PAYLOAD_DATA_LENGTH 126
 
 typedef struct {
 	uint8_t opcode_rsv_fin; // opcode: 4, rsv1: 1, rsv2: 1, rsv3: 1, fin: 1
