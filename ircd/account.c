@@ -1,5 +1,5 @@
 /*
- * include/account.h
+ * ircd/account.c
  * Copyright (c) 2020 Ariadne Conill <ariadne@dereferenced.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,22 +27,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __OPHION_ACCOUNT_H_GUARD
-#define __OPHION_ACCOUNT_H_GUARD
+#include "stdinc.h"
+#include "account.h"
 
-#include "ircd_defs.h"
-#include "client.h"
-#include "setup.h"
-#include "rb_radixtree.h"
+rb_radixtree *account_dict;
 
-struct Account {
-	char *name;
-	time_t creation_ts;
-	rb_dlink_list prop_list;
-};
+void
+account_init(void)
+{
+	account_dict = rb_radixtree_create("account", irccasecanon);
+}
 
-extern rb_radixtree *account_dict;
+struct Account *
+account_find(const char *name, bool create, bool *new)
+{
+	struct Account *account_p = rb_radixtree_retrieve(account_dict, name);
 
-extern struct Account *account_find(const char *name, bool create, bool *new);
+	if (!create)
+		return NULL;
 
-#endif
+	account_p = rb_malloc(sizeof(*account_p));
+	account_p->name = rb_strdup(name);
+	account_p->creation_ts = rb_current_time();
+
+	if (new)
+		*new = true;
+
+	return account_p;
+}

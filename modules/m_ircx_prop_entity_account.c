@@ -104,9 +104,9 @@ h_fn_burst_finished(void *vdata)
 {
 	hook_data_client *hclientinfo = vdata;
 	struct Account *account_p;
-	rb_dictionary_iter iter;
+	rb_radixtree_iteration_state iter;
 
-	RB_DICTIONARY_FOREACH(account_p, &iter, account_dict)
+	RB_RADIXTREE_FOREACH(account_p, &iter, account_dict)
 		burst_account(hclientinfo->client, account_p);
 }
 
@@ -121,7 +121,17 @@ h_prop_match(void *vdata)
 	if (strncmp(prop_match->target_name, "account:", 8))
 		return;
 
-	struct Account *target_p = account_find(prop_match->target_name + 8, true);
+	bool new = false;
+	struct Account *target_p = account_find(prop_match->target_name + 8, true, &new);
+
+	/* new record, and creation_ts is non-zero, so backdate the record */
+	if (new && prop_match->creation_ts)
+		target_p->creation_ts = prop_match->creation_ts;
+	else if (prop_match->creation_ts < target_p->creation_ts)
+	{
+		target_p->creation_ts = prop_match->creation_ts;
+		propertyset_clear(&target_p->prop_list);
+	}
 
 	if (target_p == NULL)
 	{
