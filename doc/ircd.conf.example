@@ -86,6 +86,11 @@ serverinfo {
 	 */
 	ssld_count = 1;
 
+	/* ssl_client_cert: whether SSL client certificates should be enabled.  this causes
+	 * problems with Chromium-based browsers using WebSocket at the moment.
+	 */
+	ssl_client_cert = no;
+
 	/* default max clients: the default maximum number of clients
 	 * allowed to connect.  This can be changed once ircd has started by
 	 * issuing:
