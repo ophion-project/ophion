@@ -338,11 +338,10 @@ conn_mod_write_short_frame(conn_t * conn, void *data, int len)
 
 	ws_frame_set_opcode(&hdr, WEBSOCKET_OPCODE_TEXT_FRAME);
 	ws_frame_set_fin(&hdr, 1);
-	hdr.payload_length_mask = (len + 2) & 0x7f;
+	hdr.payload_length_mask = len & 0x7f;
 
 	conn_mod_write(conn, &hdr, sizeof(hdr));
 	conn_mod_write(conn, data, len);
-	conn_mod_write(conn, "\r\n", 2);
 }
 
 static void
@@ -353,11 +352,10 @@ conn_mod_write_long_frame(conn_t * conn, void *data, int len)
 	ws_frame_set_opcode(&hdr.header, WEBSOCKET_OPCODE_TEXT_FRAME);
 	ws_frame_set_fin(&hdr.header, 1);
 	hdr.header.payload_length_mask = 126;
-	hdr.payload_length_extended = htons(len + 2);
+	hdr.payload_length_extended = htons(len);
 
 	conn_mod_write(conn, &hdr, sizeof(hdr));
 	conn_mod_write(conn, data, len);
-	conn_mod_write(conn, "\r\n", 2);
 }
 
 static void
@@ -366,7 +364,7 @@ conn_mod_write_frame(conn_t *conn, void *data, int len)
 	if(IsDead(conn))	/* no point in queueing to a dead man */
 		return;
 
-	if (len < 123)
+	if (len < WEBSOCKET_MAX_UNEXTENDED_PAYLOAD_DATA_LENGTH)
 	{
 		conn_mod_write_short_frame(conn, data, len);
 		return;
