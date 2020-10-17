@@ -702,6 +702,7 @@ set_default_conf(void)
 	/* ServerInfo.name = ServerInfo.name; */
 	ServerInfo.description = NULL;
 	ServerInfo.network_name = NULL;
+	ServerInfo.ssl_client_cert = false;
 
 	memset(&ServerInfo.bind4, 0, sizeof(ServerInfo.bind4));
 	SET_SS_FAMILY(&ServerInfo.bind4, AF_UNSPEC);

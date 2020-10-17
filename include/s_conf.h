@@ -303,6 +303,7 @@ struct server_info
 	char *ssl_cipher_list;
 	int ssld_count;
 	int wsockd_count;
+	bool ssl_client_cert;
 };
 
 struct admin_info

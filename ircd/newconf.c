@@ -2628,6 +2628,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "ssl_dh_params",      CF_QSTRING, NULL, 0, &ServerInfo.ssl_dh_params },
 	{ "ssl_cipher_list",	CF_QSTRING, NULL, 0, &ServerInfo.ssl_cipher_list },
 	{ "ssld_count",		CF_INT,	    NULL, 0, &ServerInfo.ssld_count },
+	{ "ssl_client_cert",	CF_YESNO,   NULL, 0, &ServerInfo.ssl_client_cert },
 
 	{ "default_max_clients",CF_INT,     NULL, 0, &ServerInfo.default_max_clients },
 
