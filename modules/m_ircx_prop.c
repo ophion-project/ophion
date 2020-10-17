@@ -245,6 +245,8 @@ ms_tprop(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source
 		.source_p = source_p,
 		.key = parv[4],
 		.alevel = CHFL_PEON,
+		.creation_ts = atol(parv[2]),
+		.update_ts = atol(parv[3]),
 	};
 
 	time_t creation_ts = atol(parv[2]);
