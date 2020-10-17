@@ -51,7 +51,6 @@ extensions = [
   'm_omode',
   'm_opme',
   'm_sendbans',
-  'm_webirc',
   'm_roleplay',
   'hide_uncommon_channels',
   'no_kill_services',
