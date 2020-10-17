@@ -35,6 +35,7 @@
 #include "match.h"
 #include "ircd.h"
 #include "privilege.h"
+#include "account.h"
 
 /* we store ipv6 ips for remote clients, so this needs to be v6 always */
 #define HOSTIPLEN	53	/* sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255.ipv6") */
@@ -79,6 +80,7 @@ struct User
 	char *opername; /* name of operator{} block being used or tried (challenge) */
 	struct PrivilegeSet *privset;
 
+	struct Account *account;
 	char suser[NICKLEN+1];
 
 	rb_dlink_list prop_list;	/* user property list */
