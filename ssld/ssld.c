@@ -906,15 +906,15 @@ ssl_new_keys(mod_ctl_t * ctl, mod_ctl_buf_t * ctl_buf)
 	dhparam = buf;
 	buf += strlen(dhparam) + 1;
 	cipher_list = buf;
+	buf += strlen(cipher_list) + 1;
+	if (*buf == '1')
+		verify = true;
 	if(strlen(key) == 0)
 		key = cert;
 	if(strlen(dhparam) == 0)
 		dhparam = NULL;
 	if(strlen(cipher_list) == 0)
 		cipher_list = NULL;
-	buf += strlen(cipher_list) + 1;
-	if (*buf == '1')
-		verify = true;
 
 	if(!rb_setup_ssl_server(cert, key, dhparam, cipher_list, verify))
 	{
