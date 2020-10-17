@@ -1,51 +1,6 @@
-Ophion is a fork of charybdis adding partial IRCX support by its
-original author which is serving as a temporary ircd until a
-better one can be written in Elixir.  Its development is fueled
-by a lack of anything better to do on weekends now that Live PD
-(and its related drinking game) are cancelled.
+Ophion is a fork of charybdis, which itself was based on ircd-ratbox.
+Its development is lead by a team of friendly developers who have put
+a lot of time into the project, and we'd like to hear from you!
 
-Original charybdis credits below:
-
-Charybdis started as an evolution from ircd-ratbox. Its development
-is led by a team of dedicated developers who have put a lot of time
-into the project and it has seen use on a variety of different
-network configurations.
-
-The Charybdis core team, listed in nick-alphabetical order:
-
-amdj, Aaron Jones <aaronmdjones -at- gmail.com>
-Elizafox, Elizabeth Myers <elizabeth -at- interlinked.me>
-jilles, Jilles Tjoelker <jilles -at- stack.nl>
-kaniini, Ariadne Conill <ariadne -at- dereferenced.org>
-mr_flea, Keith Buck <mr_flea -at- esper.net>
-Simon, Simon Arlott <charybdis -at- uuid.uk>
-
-The following people are also project members, listed in nick-alphabetical
-order:
-
-jdhore, JD Horelick <jdhore1 -at- gmail.com>
-viatsko, Valerii Iatsko <dwr -at- codingbox.io>
-
-The following people have made contributions to the Charybdis releases,
-in nick-alphabetical order:
-
-AndroSyn, Aaron Sethman <androsyn -at- ratbox.org>
-anfl, Lee Hardy <lee -at- leeh.co.uk>
-beu, Elfyn McBratney <elfyn.mcbratney -at- gmail.com>
-BlindSight, Matt Ullman <matt -at- airraidsirens.com>
-Entrope, Michael Poole <mdpoole -at- trolius.org>
-grawity, Mantas Mikulėnas <grawity -at- gmail.com>
-gxti, Michael Tharp <gxti -at- partiallystapled.com>
-mniip <mniip -at- mniip.com>
-spb, Stephen Bennett <spb -at- attenuate.org>
-Taros, Brett Greenham <taros -at- shadowircd.net>
-ThaPrince, Jon Christopherson <jon -at- vile.com>
-twincest, River Tarnell <river -at- attenuate.org>
-w00t, Robin Burchell <surreal.w00t -at- gmail.com>
-
-For a list of contributors to ircd-ratbox, ircd-hybrid, and ircd2.8 (the
-predecessors to Charybdis), see the doc/credits-past.txt file in the Charybdis
-distribution.
-
-Visit the Charybdis website at: http://www.charybdis.io/
-Visit us on IRC at: irc.charybdis.io #charybdis
+For more information about contributions to predecessors of this
+project, see doc/credits-past.txt in the Ophion source distribution.
