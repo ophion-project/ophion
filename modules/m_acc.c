@@ -66,13 +66,33 @@ mapi_clist_av1 acc_clist[] = {
 
 DECLARE_MODULE_AV2(acc, NULL, NULL, acc_clist, NULL, NULL, acc_cap_list, NULL, acc_desc);
 
-static struct acc_cmd
-{
+struct acc_cmd {
 	const char *cmd;
 	void (*func)(struct Client *source_p, int parc, const char *parv[]);
-} acc_cmdlist[] = {
-	/* This list *MUST* be in alphabetical order */
 };
+
+static void m_acc_ls(struct Client *source_p, int parc, const char *parv[]);
+
+static struct acc_cmd acc_cmdlist[] = {
+	/* This list *MUST* be in alphabetical order */
+	{"LS", m_acc_ls},
+};
+
+static void
+m_acc_ls(struct Client *source_p, int parc, const char *parv[])
+{
+	char acc_subcmd_buf[BUFSIZE] = {};
+	size_t i;
+
+	for (i = 0; i < ARRAY_SIZE(acc_cmdlist); i++)
+	{
+		rb_strlcat(acc_subcmd_buf, acc_cmdlist[i].cmd, sizeof acc_subcmd_buf);
+		rb_strlcat(acc_subcmd_buf, " ", sizeof acc_subcmd_buf);
+	}
+
+	sendto_one(source_p, ":%s ACC LS * SUBCOMMANDS :%s", me.name, acc_subcmd_buf);
+	sendto_one(source_p, ":%s ACC LS CREDTYPES :passphrase", me.name);
+}
 
 /*
  */
