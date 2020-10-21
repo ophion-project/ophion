@@ -72,12 +72,18 @@ struct acc_cmd {
 };
 
 static void m_acc_ls(struct Client *source_p, int parc, const char *parv[]);
+static void m_acc_register(struct Client *source_p, int parc, const char *parv[]);
 
 static struct acc_cmd acc_cmdlist[] = {
 	/* This list *MUST* be in alphabetical order */
 	{"LS", m_acc_ls},
+	{"REGISTER", m_acc_register},
 };
 
+/*
+ * ACC LS - list available properties of the authentication layer.
+ * Parameters: takes no parameters
+ */
 static void
 m_acc_ls(struct Client *source_p, int parc, const char *parv[])
 {
@@ -95,7 +101,45 @@ m_acc_ls(struct Client *source_p, int parc, const char *parv[])
 }
 
 /*
+ * ACC REGISTER - register an account with the authentication layer.
+ * Parameters:
+ *   parv[1] = "REGISTER"
+ *   parv[2] = account name
+ *   parv[3] = callback URI (ignored)
+ *   parv[4] = credential type (must be a recognized credential -- passphrase or certfp)
+ *   parv[5] = credential (or unspecified for certfp)
  */
+static void
+m_acc_register(struct Client *source_p, int parc, const char *parv[])
+{
+	if (!irccmp(parv[4], "passphrase"))
+	{
+		sendto_one(source_p, ":%s FAIL ACC REG_INVALID_CRED_TYPE %s %s :Credential type is invalid",
+			   me.name, parv[2], parv[4]);
+		return;
+	}
+
+	bool new_account = false;
+	struct Account *account_p = account_find(parv[2], true, &new_account);
+
+	/* account already exists? */
+	if (account_p != NULL && !new_account)
+	{
+		sendto_one(source_p, ":%s FAIL ACC ACCOUNT_ALREADY_EXISTS %s :Account already exists",
+			   me.name, parv[2]);
+		return;
+	}
+
+	struct Property *prop = propertyset_add(&account_p->prop_list, "passphrase", parv[5], &me);
+
+	sendto_server(NULL, NULL, CAP_TS6, NOCAPS, ":%s TPROP account:%s %ld %ld %s :%s",
+		      use_id(&me), account_p->name, account_p->creation_ts, prop->set_at, prop->name, prop->value);
+
+	sendto_one_numeric(source_p, RPL_REG_SUCCESS, form_str(RPL_REG_SUCCESS), parv[2]);
+
+	/* XXX: log user in */
+}
+
 static int
 acc_cmd_search(const char *command, struct acc_cmd *entry)
 {
