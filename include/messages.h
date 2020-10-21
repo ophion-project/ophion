@@ -265,4 +265,7 @@
 #define NUMERIC_STR_917      "%s :Too many properties"
 #define NUMERIC_STR_918      "%s :You cannot edit properties on this object"
 
+#define NUMERIC_STR_920      "%s :Account created"
+#define NUMERIC_STR_927      "%s %s :A verification token was sent"
+
 #endif
