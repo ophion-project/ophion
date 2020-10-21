@@ -400,6 +400,9 @@
 #define ERR_PROP_TOOMANY	917
 #define ERR_PROPDENIED		918
 
+#define RPL_REG_SUCCESS		920
+#define RPL_REG_VERIFICATION_REQUIRED	927
+
 #define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */
