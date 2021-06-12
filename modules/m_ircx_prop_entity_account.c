@@ -163,7 +163,7 @@ h_ircx_account_login(void *vdata)
 		return;
 
 	struct Client *client_p = hdata->source_p;
-	strlcpy(client_p->user->suser, hdata->account_name, sizeof client_p->user->suser);
+	rb_strlcpy(client_p->user->suser, hdata->account_name, sizeof client_p->user->suser);
 
 	sendto_server(NULL, NULL, CAP_ENCAP, NOCAPS, ":%s ENCAP * LOGIN %s",
 		      use_id(client_p), client_p->user->suser);
