@@ -64,7 +64,14 @@ mapi_clist_av1 acc_clist[] = {
 	&acc_msgtab, NULL
 };
 
-DECLARE_MODULE_AV2(acc, NULL, NULL, acc_clist, NULL, NULL, acc_cap_list, NULL, acc_desc);
+static int h_ircx_account_login;
+
+mapi_hlist_av1 acc_hlist[] = {
+	{ "ircx_account_login", &h_ircx_account_login },
+	{ NULL, NULL }
+};
+
+DECLARE_MODULE_AV2(acc, NULL, NULL, acc_clist, acc_hlist, NULL, acc_cap_list, NULL, acc_desc);
 
 struct acc_cmd {
 	const char *cmd;
@@ -199,7 +206,12 @@ m_acc_register(struct Client *source_p, int parc, const char *parv[])
 
 	sendto_one_numeric(source_p, RPL_REG_SUCCESS, form_str(RPL_REG_SUCCESS), parv[2]);
 
-	/* XXX: log user in */
+	hook_data_account_login req;
+
+	req.source_p = source_p;
+	req.account_name = account_p->name;
+
+	call_hook(h_ircx_account_login, &req);
 }
 
 static int
