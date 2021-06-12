@@ -48,8 +48,21 @@ static const char register_desc[] = "Provides REGISTER command and draft/account
 
 unsigned int CLICAP_REGISTER;
 
+static const char *
+register_data(struct Client *client_p)
+{
+	(void) client_p;
+
+	return "custom-accountname";
+}
+
+static struct ClientCapability register_cap = {
+	.data = register_data,
+	.flags = CLICAP_FLAGS_STICKY,
+};
+
 mapi_cap_list_av2 register_cap_list[] = {
-	{ MAPI_CAP_CLIENT, "draft/account-registration", NULL, &CLICAP_REGISTER },
+	{ MAPI_CAP_CLIENT, "draft/account-registration", &register_cap, &CLICAP_REGISTER },
 	{ 0, NULL, NULL, NULL },
 };
 
