@@ -180,4 +180,10 @@ typedef struct
 	bool signal;
 } hook_data_rehash;
 
+typedef struct
+{
+	struct Client *source_p;
+	const char *account_name;
+} hook_data_account_login;
+
 #endif
