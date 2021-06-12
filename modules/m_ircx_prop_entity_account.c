@@ -55,10 +55,12 @@ mapi_hlist_av1 ircx_prop_entity_account_hlist[] = {
 
 static void h_fn_burst_finished(void *);
 static void h_prop_match(void *);
+static void h_ircx_account_login(void *);
 
 mapi_hfn_list_av1 ircx_prop_entity_account_hfnlist[] = {
 	{ "burst_finished", (hookfn) h_fn_burst_finished },
 	{ "prop_match", (hookfn) h_prop_match },
+	{ "ircx_account_login", (hookfn) h_ircx_account_login },
 	{ NULL, NULL }
 };
 
@@ -149,6 +151,22 @@ h_prop_match(void *vdata)
 	prop_match->creation_ts = target_p->creation_ts;
 	prop_match->prop_list = &target_p->prop_list;
 	prop_match->target = target_p;
+}
+
+static void
+h_ircx_account_login(void *vdata)
+{
+	hook_data_account_login *hdata = vdata;
+
+	/* remote users cannot really ever hit this code path, but its good to check */
+	if (!MyClient(hdata->source_p) || !IsPerson(hdata->source_p))
+		return;
+
+	struct Client *client_p = hdata->source_p;
+	strlcpy(client_p->user->suser, hdata->account_name, sizeof client_p->user->suser);
+
+	sendto_server(NULL, NULL, CAP_ENCAP, NOCAPS, ":%s ENCAP * LOGIN %s",
+		      use_id(client_p), client_p->user->suser);
 }
 
 DECLARE_MODULE_AV2(ircx_prop_entity_account, NULL, NULL, NULL, ircx_prop_entity_account_hlist, ircx_prop_entity_account_hfnlist, NULL, NULL, ircx_prop_entity_account_desc);
