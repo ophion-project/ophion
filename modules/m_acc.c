@@ -80,6 +80,65 @@ static struct acc_cmd acc_cmdlist[] = {
 	{"REGISTER", m_acc_register},
 };
 
+static char saltChars[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	/* 0 .. 63, ascii - 64 */
+
+/* Passphrase encryption routines:
+ *
+ * Based on mkpasswd.c, originally by Nelson Minar (minar@reed.edu)
+ * You can use this code in any way as long as these names remain.
+ */
+static char *
+generate_poor_salt(char *salt, int length)
+{
+	int i;
+
+	srand(time(NULL));
+	for(i = 0; i < length; i++)
+		salt[i] = saltChars[rand() % 64];
+
+	return (salt);
+}
+
+static char *
+generate_random_salt(char *salt, int length)
+{
+	int fd, i;
+
+	if((fd = open("/dev/urandom", O_RDONLY)) < 0)
+		return (generate_poor_salt(salt, length));
+
+	if(read(fd, salt, (size_t)length) != length)
+	{
+		close(fd);
+		return (generate_poor_salt(salt, length));
+	}
+
+	for(i = 0; i < length; i++)
+		salt[i] = saltChars[abs(salt[i]) % 64];
+
+	close(fd);
+	return (salt);
+}
+
+static char *
+make_sha512_salt(int length)
+{
+	static char salt[21];
+	if(length > 16)
+	{
+		printf("SHA512 salt length too long\n");
+		exit(0);
+	}
+	salt[0] = '$';
+	salt[1] = '6';
+	salt[2] = '$';
+	generate_random_salt(&salt[3], length);
+	salt[length + 3] = '$';
+	salt[length + 4] = '\0';
+	return salt;
+}
+
 /*
  * ACC LS - list available properties of the authentication layer.
  * Parameters: takes no parameters
@@ -130,7 +189,10 @@ m_acc_register(struct Client *source_p, int parc, const char *parv[])
 		return;
 	}
 
-	struct Property *prop = propertyset_add(&account_p->prop_list, "passphrase", parv[5], &me);
+	const char *salt = make_sha512_salt(16);
+	const char *crypted_passphrase = rb_crypt(parv[5], salt);
+
+	struct Property *prop = propertyset_add(&account_p->prop_list, "passphrase", crypted_passphrase, &me);
 
 	sendto_server(NULL, NULL, CAP_TS6, NOCAPS, ":%s TPROP account:%s %ld %ld %s :%s",
 		      use_id(&me), account_p->name, account_p->creation_ts, prop->set_at, prop->name, prop->value);
