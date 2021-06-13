@@ -70,7 +70,7 @@ static void m_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct 
 
 struct Message register_msgtab = {
 	"REGISTER", 0, 0, 0, 0,
-	{mg_unreg, {m_register, 2}, mg_ignore, mg_ignore, mg_ignore, {m_register, 2}}
+	{mg_unreg, {m_register, 4}, mg_ignore, mg_ignore, mg_ignore, {m_register, 4}}
 };
 
 mapi_clist_av1 register_clist[] = {
