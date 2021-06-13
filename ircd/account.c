@@ -43,6 +43,9 @@ account_find(const char *name, bool create, bool *new)
 {
 	struct Account *account_p = rb_radixtree_retrieve(account_dict, name);
 
+	if (account_p != NULL)
+		return account_p;
+
 	if (!create)
 		return NULL;
 
@@ -52,6 +55,8 @@ account_find(const char *name, bool create, bool *new)
 
 	if (new)
 		*new = true;
+
+	rb_radixtree_add(account_dict, account_p->name, account_p);
 
 	return account_p;
 }
