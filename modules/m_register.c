@@ -66,11 +66,12 @@ mapi_cap_list_av2 register_cap_list[] = {
 	{ 0, NULL, NULL, NULL },
 };
 
+static void mu_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 static void m_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p, int parc, const char *parv[]);
 
 struct Message register_msgtab = {
 	"REGISTER", 0, 0, 0, 0,
-	{mg_unreg, {m_register, 4}, mg_ignore, mg_ignore, mg_ignore, {m_register, 4}}
+	{{mu_register, 0}, {m_register, 4}, mg_ignore, mg_ignore, mg_ignore, {m_register, 4}}
 };
 
 mapi_clist_av1 register_clist[] = {
@@ -195,4 +196,11 @@ m_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *sour
 	req.account_name = account_p->name;
 
 	call_hook(h_ircx_account_login, &req);
+}
+
+static void
+mu_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	sendto_one(source_p, ":%s FAIL REGISTER COMPLETE_CONNECTION_REQUIRED :Early registration not yet supported, sorry",
+		   me.name);
 }
