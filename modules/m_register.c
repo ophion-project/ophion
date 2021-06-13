@@ -158,7 +158,14 @@ m_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *sour
 {
 	bool new_account = false;
 	const char *accountname = *parv[1] == '*' ? client_p->name : parv[1];
-	struct Account *account_p = account_find(accountname, true, &new_account);
+
+	/* valid accountname? */
+	if (!clean_nick(accountname))
+	{
+		sendto_one(source_p, ":%s FAIL REGISTER BAD_ACCOUNTNAME %s :Invalid account name",
+			   me.name, accountname);
+		return;
+	}
 
 	/* is the user already logged in? */
 	if (*source_p->user->suser)
@@ -170,6 +177,9 @@ m_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *sour
 			   me.name, source_p->user->suser);
 		return;
 	}
+
+	/* find or create the account */
+	struct Account *account_p = account_find(accountname, true, &new_account);
 
 	/* account already exists? */
 	if (account_p != NULL && !new_account)
