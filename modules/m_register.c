@@ -160,7 +160,7 @@ m_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *sour
 	const char *accountname = *parv[1] == '*' ? client_p->name : parv[1];
 
 	/* valid accountname? */
-	if (!clean_nick(accountname))
+	if (!clean_nick(accountname, TRUE))
 	{
 		sendto_one(source_p, ":%s FAIL REGISTER BAD_ACCOUNTNAME %s :Invalid account name",
 			   me.name, accountname);
