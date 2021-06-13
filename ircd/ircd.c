@@ -675,6 +675,7 @@ charybdis_main(int argc, char * const argv[])
 
 	/* initialise operhash fairly early. */
 	init_operhash();
+	account_init();
 
 	memset(&me, 0, sizeof(me));
 	memset(&meLocalUser, 0, sizeof(meLocalUser));

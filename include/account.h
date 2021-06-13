@@ -43,6 +43,7 @@ struct Account {
 
 extern rb_radixtree *account_dict;
 
+extern void account_init(void);
 extern struct Account *account_find(const char *name, bool create, bool *new);
 
 #endif
