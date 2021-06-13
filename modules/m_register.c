@@ -159,6 +159,17 @@ m_register(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *sour
 	const char *accountname = *parv[1] == '*' ? client_p->name : parv[1];
 	struct Account *account_p = account_find(accountname, true, &new_account);
 
+	/* is the user already logged in? */
+	if (*source_p->user->suser)
+	{
+		/* this should really be ALREADY_AUTHENTICATED in my opinion, see
+		 * https://github.com/ircv3/ircv3-specifications/pull/435#r650449903
+		 */
+		sendto_one(source_p, ":%s FAIL REGISTER ALREADY_REGISTERED %s :Already authenticated",
+			   me.name, source_p->user->suser);
+		return;
+	}
+
 	/* account already exists? */
 	if (account_p != NULL && !new_account)
 	{
