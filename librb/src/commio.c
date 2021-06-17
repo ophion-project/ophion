@@ -123,29 +123,6 @@ rb_close_pending_fds(void)
 	}
 }
 
-/* 32bit solaris is kinda slow and stdio only supports fds < 256
- * so we got to do this crap below.
- * (BTW Fuck you Sun, I hate your guts and I hope you go bankrupt soon)
- */
-
-#if defined (__SVR4) && defined (__sun)
-static void
-rb_fd_hack(int *fd)
-{
-	int newfd;
-	if(*fd > 256 || *fd < 0)
-		return;
-	if((newfd = fcntl(*fd, F_DUPFD, 256)) != -1)
-	{
-		close(*fd);
-		*fd = newfd;
-	}
-	return;
-}
-#else
-#define rb_fd_hack(fd)
-#endif
-
 
 /* close_all_connections() can be used *before* the system come up! */
 
@@ -533,8 +510,6 @@ static void rb_accept_tryaccept(rb_fde_t *F, void *data __attribute__((unused)))
 			return;
 		}
 
-		rb_fd_hack(&new_fd);
-
 		new_F = rb_open(new_fd, RB_FD_SOCKET | (F->type & RB_FD_INHERIT_TYPES), "Incoming Connection");
 
 		if(new_F == NULL)
@@ -848,9 +823,6 @@ rb_socketpair(int family, int sock_type, int proto, rb_fde_t **F1, rb_fde_t **F2
 #endif
 		return -1;
 
-	rb_fd_hack(&nfd[0]);
-	rb_fd_hack(&nfd[1]);
-
 	*F1 = rb_open(nfd[0], RB_FD_SOCKET, note);
 	*F2 = rb_open(nfd[1], RB_FD_SOCKET, note);
 
@@ -900,8 +872,7 @@ rb_pipe(rb_fde_t **F1, rb_fde_t **F2, const char *desc)
 	}
 	if(pipe(fd) == -1)
 		return -1;
-	rb_fd_hack(&fd[0]);
-	rb_fd_hack(&fd[1]);
+
 	*F1 = rb_open(fd[0], RB_FD_PIPE, desc);
 	*F2 = rb_open(fd[1], RB_FD_PIPE, desc);
 
@@ -956,7 +927,6 @@ rb_socket(int family, int sock_type, int proto, const char *note)
 	 * XXX !!! -- adrian
 	 */
 	fd = socket(family, sock_type, proto);
-	rb_fd_hack(&fd);
 	if(rb_unlikely(fd < 0))
 		return NULL;	/* errno will be passed through, yay.. */
 
