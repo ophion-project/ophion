@@ -158,6 +158,8 @@ struct Client
 	char *certfp; /* client certificate fingerprint */
 };
 
+struct sasl_session;
+
 struct LocalUser
 {
 	rb_dlink_node tnode;	/* This is the node for the local list type the client is on */
@@ -273,13 +275,7 @@ struct LocalUser
 	uint16_t cork_count;			/* used for corking/uncorking connections */
 	struct ev_entry *event;			/* used for associated events */
 
-	char sasl_agent[IDLEN];
-	unsigned char sasl_out;
-	unsigned char sasl_complete;
-
-	unsigned int sasl_messages;
-	unsigned int sasl_failures;
-	time_t sasl_next_retry;
+	struct sasl_session *sess;
 };
 
 #define AUTHC_F_DEFERRED 0x01
