@@ -775,10 +775,6 @@ set_default_conf(void)
 	ConfigFileEntry.away_interval = 30;
 	ConfigFileEntry.tls_ciphers_oper_only = false;
 
-#ifdef HAVE_LIBZ
-	ConfigFileEntry.compression_level = 4;
-#endif
-
 	ConfigFileEntry.oper_umodes = UMODE_LOCOPS | UMODE_SERVNOTICE |
 		UMODE_OPERWALL | UMODE_WALLOP;
 	ConfigFileEntry.oper_only_umodes = UMODE_SERVNOTICE;
