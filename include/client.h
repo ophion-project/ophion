@@ -277,7 +277,6 @@ struct LocalUser
 			      applicable to this client */
 
 	struct _ssl_ctl *ssl_ctl;		/* which ssl daemon we're associate with */
-	struct _ssl_ctl *z_ctl;			/* second ctl for ssl+zlib */
 	struct ws_ctl *ws_ctl;			/* ctl for wsockd */
 	SSL_OPEN_CB *ssl_callback;		/* ssl connection is now open */
 	uint32_t localflags;
