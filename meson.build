@@ -37,13 +37,6 @@ bison_gen = generator(bison,
 
 cdata = configuration_data()
 
-# zlib
-zlib_dep = dependency('zlib', required: false)
-
-if zlib_dep.found()
-  cdata.set('HAVE_LIBZ', true)
-endif
-
 # tls: we prefer mbedtls if we can find it, else gnutls and then openssl
 libcrypto_dep = dependency('libcrypto', required: false)
 
