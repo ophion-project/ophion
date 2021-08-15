@@ -72,6 +72,23 @@ end_session(struct Client *client_p)
 }
 
 static void
+login_session(struct Client *client_p)
+{
+	if (!MyClient(client_p))
+		return;
+
+	struct User *user_p = client_p->user;
+	if (!IsPerson(client_p) && IsUnknown(client_p))
+		user_p = make_user(client_p);
+
+	struct sasl_session *sess = client_p->localClient->sess;
+	if (sess != NULL && *sess->authzid)
+		rb_strlcpy(user_p->suser, sess->authzid, sizeof sess->authzid);
+
+	end_session(client_p);
+}
+
+static void
 m_authenticate(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	if (!IsCapable(source_p, CLICAP_SASL))
@@ -171,7 +188,14 @@ m_authenticate(struct MsgBuf *msgbuf_p, struct Client *client_p, struct Client *
 
 		break;
 	case SASL_MRESULT_SUCCESS:
-		end_session(source_p);
+		login_session(source_p);
+
+		if (*source_p->user->suser)
+			sendto_one(source_p, form_str(RPL_LOGGEDIN), me.name, EmptyString(source_p->name) ? "*" : source_p->name,
+				EmptyString(source_p->name) ? "*" : source_p->name,
+				EmptyString(source_p->username) ? "*" : source_p->username,
+				EmptyString(source_p->host) ? "*" : source_p->host,
+				source_p->user->suser, source_p->user->suser);
 
 		sendto_one(source_p, form_str(RPL_SASLSUCCESS), me.name, EmptyString(source_p->name) ? "*" : source_p->name);
 		break;
