@@ -24,6 +24,8 @@ enum sasl_mechanism_result {
 };
 
 #define SASL_MECHANISM_MAXLEN	60U
+#define SASL_DECBUF_LEN		4096U
+#define SASL_MAXPACKET_B64	400U
 
 struct sasl_mechanism;
 
@@ -37,6 +39,8 @@ struct sasl_session {
 	char *buf;
 	char authcid[NICKLEN + 1];
 	char authzid[NICKLEN + 1];
+
+	bool continuing;
 };
 
 struct sasl_input_buf {
@@ -59,7 +63,8 @@ struct sasl_mechanism {
 
 struct sasl_hook_data {
 	struct Client *client;
-	char *name;
+	const char *name;
+	struct sasl_mechanism *mech;
 };
 
 #endif

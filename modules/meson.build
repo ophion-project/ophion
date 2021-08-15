@@ -62,6 +62,7 @@ modules = [
   'm_rehash',
   'm_restart',
   'm_resv',
+  'm_sasl_core',
   'm_scan',
   'm_services',
   'm_set',
